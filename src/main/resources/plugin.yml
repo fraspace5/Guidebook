@@ -1,0 +1,19 @@
+name: Guidebook
+main: com.mcmiddleearth.guidebook.GuidebookPlugin
+version: 0.0.1
+description: sending information about places via chat messages
+load: POSTWORLD
+softdepend: [Multiverse-Core]
+commands:
+    guidebook:
+        description: manage guidebook areas
+        usage: invalid subcommand
+permissions:
+    guidebook.staff:
+        description: Gives access to all guidebook commands
+        default: op
+        children:
+            autoteleport.user: true
+    guidebook.user:
+        description: gives access to /guidebook on and /guidebook off
+        default: true
