@@ -16,20 +16,32 @@
  */
 package com.mcmiddleearth.guidebook.conversation;
 
-import com.mcmiddleearth.guidebook.data.PluginData;
-import org.bukkit.ChatColor;
+import com.mcmiddleearth.guidebook.data.InfoArea;
+import com.mcmiddleearth.guidebook.util.InputUtil;
 import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.ConversationPrefix;
+import org.bukkit.conversations.Prompt;
+import org.bukkit.conversations.StringPrompt;
 
 /**
  *
  * @author Eriol_Eandur
  */
-class ConfirmationPrefix implements ConversationPrefix {
+public class TitleEditEnterSubtitlePrompt extends StringPrompt{
 
     @Override
-    public String getPrefix(ConversationContext cc) {
-        return ChatColor.AQUA+PluginData.getMessageUtil().getPREFIX();
+    public String getPromptText(ConversationContext cc) {
+        return "Enter a new subtitle!";
     }
     
+    @Override
+    public Prompt acceptInput(ConversationContext cc, String input) {
+        InfoArea area = ((InfoArea)cc.getSessionData("area"));
+        area.setSubtitle(InputUtil.replaceAltColorCode(input));
+        if(area.isShowTitle()) {
+            return new TitleEditEnterShowScoreboardPrompt();
+        } else {
+            return Prompt.END_OF_CONVERSATION;
+        }
+    }
+ 
 }

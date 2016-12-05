@@ -17,7 +17,7 @@
 package com.mcmiddleearth.guidebook.command;
 
 import com.mcmiddleearth.guidebook.GuidebookPlugin;
-import com.mcmiddleearth.guidebook.util.MessageUtil;
+import com.mcmiddleearth.guidebook.data.PluginData;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,14 +40,16 @@ public class GuidebookCommandExecutor implements CommandExecutor {
     private final String permissionStaff = "guidebook.staff";
     
     public GuidebookCommandExecutor() {
-        addCommandHandler("remove", new GuidebookRemove(permissionStaff));
+        addCommandHandler("delete", new GuidebookDelete(permissionStaff));
         addCommandHandler("details", new GuidebookDetails(permissionStaff));
         addCommandHandler("help", new GuidebookHelp(permissionStaff));
         addCommandHandler("list", new GuidebookList(permissionStaff));
         addCommandHandler("set", new GuidebookSet(permissionStaff));
+        addCommandHandler("show", new GuidebookShow(permissionStaff));
         addCommandHandler("size", new GuidebookSize(permissionStaff));
         addCommandHandler("warp", new GuidebookWarp(permissionStaff));
         addCommandHandler("description", new GuidebookDescription(permissionStaff));
+        addCommandHandler("title", new GuidebookTitle(permissionStaff));
         addCommandHandler("on", new GuidebookOn(permission));
         addCommandHandler("off", new GuidebookOff(permission));
         addCommandHandler("dev", new GuidebookDev(permissionStaff));
@@ -73,11 +75,11 @@ public class GuidebookCommandExecutor implements CommandExecutor {
     private void sendNoSubcommandErrorMessage(CommandSender cs) {
         //MessageUtil.sendErrorMessage(cs, "You're missing subcommand name for this command.");
         PluginDescriptionFile descr = GuidebookPlugin.getPluginInstance().getDescription();
-        MessageUtil.sendErrorMessage(cs, descr.getName()+" - version "+descr.getVersion());
+        PluginData.getMessageUtil().sendErrorMessage(cs, descr.getName()+" - version "+descr.getVersion());
     }
     
     private void sendSubcommandNotFoundErrorMessage(CommandSender cs) {
-        MessageUtil.sendErrorMessage(cs, "Subcommand not found.");
+        PluginData.getMessageUtil().sendErrorMessage(cs, "Subcommand not found.");
     }
     
     private void addCommandHandler(String name, GuidebookCommand handler) {

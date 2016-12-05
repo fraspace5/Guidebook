@@ -7,11 +7,8 @@ package com.mcmiddleearth.guidebook.command;
 
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
-import com.mcmiddleearth.guidebook.util.MessageUtil;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.mcmiddleearth.pluginutil.message.FancyMessage;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -29,15 +26,15 @@ public class GuidebookList extends GuidebookCommand{
     
     @Override
     protected void execute(CommandSender cs, String... args) {
-        MessageUtil.sendInfoMessage(cs, "Guidebook areas:");
+        PluginData.getMessageUtil().sendInfoMessage(cs, "Guidebook areas (click for details):");
         for(String areaName : PluginData.getInfoAreas().keySet()) {
             if(args.length==0 || areaName.startsWith(args[0])) {
                 InfoArea area = PluginData.getInfoArea(areaName);
-                Map<String,String> message = new LinkedHashMap<>();
-                message.put(ChatColor.AQUA+MessageUtil.getNOPREFIX()+"- ",null);
-                message.put(ChatColor.BLUE+areaName,"/guidebook warp "+areaName);
-                message.put(ChatColor.AQUA+".",null);
-                MessageUtil.sendClickableMessage((Player)cs, message);
+                FancyMessage message = new FancyMessage(PluginData.getMessageUtil());
+                message.addSimple(ChatColor.AQUA+PluginData.getMessageUtil().getNOPREFIX()+"- ");
+                message.addClickable(ChatColor.BLUE+areaName,"/guidebook details "+areaName);
+                message.addSimple(ChatColor.AQUA+".");
+                message.send((Player)cs);
             }
         }
         

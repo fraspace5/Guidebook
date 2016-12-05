@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 MCME
+ * Copyright (C) 2016 MCME
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.mcmiddleearth.guidebook.conversation;
-
-import com.mcmiddleearth.guidebook.data.PluginData;
-import org.bukkit.ChatColor;
-import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.ConversationPrefix;
+package com.mcmiddleearth.guidebook.util;
 
 /**
  *
  * @author Eriol_Eandur
  */
-class ConfirmationPrefix implements ConversationPrefix {
-
-    @Override
-    public String getPrefix(ConversationContext cc) {
-        return ChatColor.AQUA+PluginData.getMessageUtil().getPREFIX();
-    }
+public class InputUtil {
     
+    public static String replaceAltColorCode(String string) {
+        return string.replace('#','§');
+    }
 }

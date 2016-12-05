@@ -10,7 +10,6 @@ import com.mcmiddleearth.guidebook.conversation.ConfirmationFactory;
 import com.mcmiddleearth.guidebook.conversation.Confirmationable;
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
-import com.mcmiddleearth.guidebook.util.MessageUtil;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,11 +20,11 @@ import org.bukkit.entity.Player;
  *
  * @author Eriol_Eandur
  */
-public class GuidebookRemove extends GuidebookCommand implements Confirmationable{
+public class GuidebookDelete extends GuidebookCommand implements Confirmationable{
     
     private String areaName;
     
-    public GuidebookRemove(String... permissionNodes) {
+    public GuidebookDelete(String... permissionNodes) {
         super(1, true, permissionNodes);
         setShortDescription(": Deletes a guidebook area.");
         setUsageDescription(" <AreaName>: Deletes guidebook area with name <AreaName>.");
@@ -51,16 +50,16 @@ public class GuidebookRemove extends GuidebookCommand implements Confirmationabl
             PluginData.saveData();
         } catch (IOException ex) {
             sendIOErrorMessage(player);
-            Logger.getLogger(GuidebookRemove.class.getName()).log(Level.SEVERE, null, ex);
-            MessageUtil.sendErrorMessage(player, "There was an error.");
+            Logger.getLogger(GuidebookDelete.class.getName()).log(Level.SEVERE, null, ex);
+            PluginData.getMessageUtil().sendErrorMessage(player, "There was an error.");
             return;
         }
-        MessageUtil.sendInfoMessage(player, "Guidebook area was deleted.");
+        PluginData.getMessageUtil().sendInfoMessage(player, "Guidebook area was deleted.");
     }
 
     @Override
     public void cancelled(Player player) {
-        MessageUtil.sendErrorMessage(player, "You cancelled deleting of the area.");
+        PluginData.getMessageUtil().sendErrorMessage(player, "You cancelled deleting of the area.");
     }
     
 }

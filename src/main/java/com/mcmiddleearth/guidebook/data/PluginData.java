@@ -17,6 +17,11 @@
 package com.mcmiddleearth.guidebook.data;
 
 import com.mcmiddleearth.guidebook.GuidebookPlugin;
+import com.mcmiddleearth.pluginutil.FileUtil;
+import com.mcmiddleearth.pluginutil.message.MessageUtil;
+import com.mcmiddleearth.pluginutil.region.CuboidRegion;
+import com.mcmiddleearth.pluginutil.region.PrismoidRegion;
+import com.mcmiddleearth.pluginutil.region.SphericalRegion;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,25 +42,27 @@ import org.bukkit.entity.Player;
  * @author Eriol_Eandur
  */
 public class PluginData {
-    
+
+    @Getter
+    private static final MessageUtil messageUtil = new MessageUtil();
     
     @Getter
     private final static Map<String, InfoArea> infoAreas = new HashMap<>();
     
-    private final static Set<UUID> recipients = new HashSet<>();
+    private final static Set<UUID> excludedPlayers = new HashSet<>();
     
     @Getter
-    private static final File dataFile = new File(GuidebookPlugin.getPluginInstance().getDataFolder(),
-                                                  File.separator+"PluginData.yml");
+    private static final File dataFolder = GuidebookPlugin.getPluginInstance().getDataFolder();
     
     static {
         if(!GuidebookPlugin.getPluginInstance().getDataFolder().exists()) {
             GuidebookPlugin.getPluginInstance().getDataFolder().mkdirs();
         }
+        messageUtil.setPluginName("Guidebook");
     }
     
-    public static boolean isRecipient(Player player) {
-        return recipients.contains(player.getUniqueId());
+    public static boolean isExcluded(Player player) {
+        return excludedPlayers.contains(player.getUniqueId());
     }
     
     public static InfoArea addInfoArea(String name, InfoArea newArea) {
@@ -74,38 +81,59 @@ public class PluginData {
         return infoAreas.get(name)!=null;
     }
     
-    public static void exclude(Player player) {
-        recipients.remove(player.getUniqueId());
+    public static void include(Player player) {
+        excludedPlayers.remove(player.getUniqueId());
     }
     
-    public static void include(Player player) {
-        recipients.add(player.getUniqueId());
+    public static void exclude(Player player) {
+        excludedPlayers.add(player.getUniqueId());
     }
     
     public static void saveData() throws IOException {
-        FileConfiguration config = new YamlConfiguration();
         for(String areaName : infoAreas.keySet()) {
-            config.set(areaName, infoAreas.get(areaName).serialize());
+            FileConfiguration config = new YamlConfiguration();
+            infoAreas.get(areaName).save(config);
+            File worldFolder = new File(dataFolder,infoAreas.get(areaName).getLocation().getWorld().getName());
+            if(!worldFolder.exists()) {
+                worldFolder.mkdir();
+            }
+            File dataFile = new File(worldFolder, areaName+".yml");
+            config.save(dataFile);    
         }
-        config.save(dataFile);    
     }
     
     public static void loadData() {
-        FileConfiguration config = new YamlConfiguration();
-        try {
-            config.load(dataFile);
-            for(String areaName : config.getKeys(false)) {
-                if(config.getConfigurationSection(areaName).contains("radius")) {
-                    //infoAreas.put(areaName, 
-                    //        new SphericalInfoArea(config.getConfigurationSection(areaName)));
+        infoAreas.clear();
+            File[] worldFolders = dataFolder.listFiles(FileUtil.getDirFilter());
+            for(File folder: worldFolders) {
+                File[] dataFiles = folder.listFiles(FileUtil.getFileExtFilter("yml"));
+                for(File dataFile : dataFiles) {
+                    String areaName = FileUtil.getShortName(dataFile);
+                    FileConfiguration config = new YamlConfiguration();
+                    try {
+                        config.load(dataFile);
+                        if(SphericalRegion.isValidConfig(config)) {
+                            infoAreas.put(areaName, 
+                                    new SphericalInfoArea(config));
+                        }
+                        else if(PrismoidRegion.isValidConfig(config)) {
+                            infoAreas.put(areaName, 
+                                    new PrismoidInfoArea(config));
+                        }
+                        else if(CuboidRegion.isValidConfig(config) || config.contains("xSize")) { // xSize is to notice old data format
+                            infoAreas.put(areaName, 
+                                    new CuboidInfoArea(config));
+                        }
+                    } catch (IOException | InvalidConfigurationException ex) {
+                        Logger.getLogger(PluginData.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-                else {
-                    infoAreas.put(areaName, 
-                            new CuboidInfoArea(config.getConfigurationSection(areaName)));
-                }
-            }
-        } catch (IOException | InvalidConfigurationException ex) {
-            Logger.getLogger(PluginData.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public static void disable() {
+        for(InfoArea area: infoAreas.values()) {
+            area.clearInformedPlayers();
         }
     }
 }

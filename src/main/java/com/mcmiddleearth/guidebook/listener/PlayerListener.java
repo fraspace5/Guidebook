@@ -16,15 +16,21 @@
  */
 package com.mcmiddleearth.guidebook.listener;
 
+import com.mcmiddleearth.guidebook.GuidebookPlugin;
+import com.mcmiddleearth.guidebook.command.GuidebookShow;
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
-import com.mcmiddleearth.guidebook.util.MessageUtil;
-import org.bukkit.ChatColor;
+import com.mcmiddleearth.pluginutil.TitleUtil;
+import com.mcmiddleearth.pluginutil.message.config.MessageParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  *
@@ -35,15 +41,13 @@ public class PlayerListener implements Listener{
     @EventHandler
     public void playerMove(PlayerMoveEvent event) {
         final Player player = event.getPlayer();
-        if(!PluginData.isRecipient(player)) {
+        if(PluginData.isExcluded(player)) {
             return;
         }
         Location playerLocation = player.getLocation();
         for(String key : PluginData.getInfoAreas().keySet()) {
             InfoArea area = PluginData.getInfoAreas().get(key);
             if(area.isInside(playerLocation) && !area.isInfomed(player)) { 
-                MessageUtil.sendInfoMessage(player,ChatColor.GOLD+"Welcome to "+key+".");
-                MessageUtil.sendNoPrefixInfoMessage(player, ChatColor.YELLOW+area.getDescription());
                 area.addInformedPlayer(player);
             }
             if(!area.isNear(playerLocation)) {
@@ -51,6 +55,16 @@ public class PlayerListener implements Listener{
             }
         }
     }
+    
+    @EventHandler
+    public void playerQuit(PlayerQuitEvent event) {
+        for(InfoArea area:PluginData.getInfoAreas().values()) {
+            if(area.isInfomed(event.getPlayer())) {
+                area.removeInformedPlayer(event.getPlayer());
+            }
+        }
+    }
+    
     
 }
 

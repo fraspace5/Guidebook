@@ -7,7 +7,7 @@ package com.mcmiddleearth.guidebook.command;
 
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
-import com.mcmiddleearth.guidebook.util.MessageUtil;
+import com.mcmiddleearth.pluginutil.message.MessageUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -30,13 +30,13 @@ public class GuidebookWarp extends GuidebookCommand{
             sendNoAreaErrorMessage(cs);
         }
         else {
-            ((Player)cs).teleport(area.getCenter());
+            ((Player)cs).teleport(area.getLocation());
             sendWelcomeToCenter(cs, args[0]);
         }
     }
 
     private void sendWelcomeToCenter(CommandSender cs, String arg) {
-        MessageUtil.sendInfoMessage(cs, "You are now at center of Guidebook area "+arg+".");
+        PluginData.getMessageUtil().sendInfoMessage(cs, "You are now at Guidebook area "+arg+".");
     }
     
 }

@@ -6,7 +6,7 @@
 package com.mcmiddleearth.guidebook.command;
 
 import com.mcmiddleearth.guidebook.GuidebookPlugin;
-import com.mcmiddleearth.guidebook.conversation.DescriptionEditFactory;
+import com.mcmiddleearth.guidebook.conversation.TitleEditFactory;
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
 import java.io.IOException;
@@ -19,12 +19,12 @@ import org.bukkit.entity.Player;
  *
  * @author Eriol_Eandur
  */
-public class GuidebookDescription extends GuidebookCommand{
+public class GuidebookTitle extends GuidebookCommand{
     
-    public GuidebookDescription(String... permissionNodes) {
+    public GuidebookTitle(String... permissionNodes) {
         super(0, true, permissionNodes);
-        setShortDescription(": Defines the description of a Guidebook area.");
-        setUsageDescription(" <AreaName>: Initiates a conversation to edit the Guidbook area's description.");
+        setShortDescription(": Defines the title of a Guidebook area.");
+        setUsageDescription(" <AreaName>: Initiates a conversation to configure a Guidebook area's title.");
     }
     
     @Override
@@ -37,7 +37,7 @@ public class GuidebookDescription extends GuidebookCommand{
             if(((Player)cs).isConversing()) {
                 sendAlreadyConversing((Player) cs);
             }
-            new DescriptionEditFactory(GuidebookPlugin.getPluginInstance()).start((Player)cs, area, args[0]);
+            new TitleEditFactory(GuidebookPlugin.getPluginInstance()).start((Player)cs, area, args[0]);
         /*    int line = -1;
             int descriptionIndexShift=0;
             if(args.length>3 && NumericUtil.isInt(args[2])) {
@@ -119,7 +119,7 @@ Logger.getGlobal().info("Desc*** "+areaDescription);
             PluginData.saveData();
         } catch (IOException ex) {
             sendIOErrorMessage(cs);
-            Logger.getLogger(GuidebookDescription.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GuidebookTitle.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

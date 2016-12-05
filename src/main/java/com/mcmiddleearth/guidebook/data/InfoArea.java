@@ -16,21 +16,29 @@
  */
 package com.mcmiddleearth.guidebook.data;
 
+import com.mcmiddleearth.guidebook.GuidebookPlugin;
+import com.mcmiddleearth.guidebook.command.GuidebookShow;
+import com.mcmiddleearth.guidebook.listener.PlayerListener;
+import com.mcmiddleearth.pluginutil.TitleUtil;
+import com.mcmiddleearth.pluginutil.message.config.MessageParseException;
+import com.mcmiddleearth.pluginutil.region.Region;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  *
@@ -38,31 +46,79 @@ import org.bukkit.entity.Player;
  */
 public abstract class InfoArea {
     
-    @Getter
-    @Setter
-    private Location center;
-        
+    protected Region region;
+    
     private final Set<UUID> informedPlayers = new HashSet<>();
     
+    private final BossBar bossBar;
+    
+    @Getter
+    private String title;
+    
     @Getter
     @Setter
-    private String description = "";
+    private String subtitle;
     
     @Getter
-    private int nearDistance = 10;
+    @Setter
+    private boolean showTitle;
     
-    public InfoArea(Location center) {
-        this.center = center;
+    @Getter
+    @Setter
+    private boolean showScoreboard;
+            
+    @Getter
+    @Setter
+    private List<String> description = new ArrayList<>();
+    
+    private final int nearDistance = 10;
+    
+    protected InfoArea() {
+        //scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        bossBar = Bukkit.getServer().createBossBar("unnamed Guidebook area", BarColor.YELLOW, BarStyle.SOLID);
+        bossBar.setProgress(0);
+        setTitle("unnamed Guidebook area");
+        subtitle = "";
     }
     
     public InfoArea(ConfigurationSection config) {
-        this.center = deserializeLocation(config.getConfigurationSection("center"));
-        this.description = config.getString("description");
+        //this.center = deserializeLocation(config.getConfigurationSection("center"));
+        this();
+        if(config.contains("title")) {
+            setTitle((String) config.get("title"));
+            subtitle = (String) config.get("subtitle");
+            showScoreboard = config.getBoolean("showScoreboard");
+            showTitle = config.getBoolean("showTitle");
+        }
+        if(config.isList("description")) {
+            this.description = config.getStringList("description");
+        } else {
+            this.description.add(config.getString("description"));
+        }
     }
     
-    public abstract boolean isNear(Location loc);
+    public final void setTitle(String newTitle) {
+        /*Objective obj = scoreboard.getObjective(newTitle);
+        if(obj!=null) {
+            obj.unregister();
+        }
+        Objective objective = scoreboard.registerNewObjective(newTitle, "dummy");
+        objective.getScore("dummy").setScore(0);
+        objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);*/
+        bossBar.setTitle(newTitle);
+        title = newTitle;
+    }
     
-    public abstract boolean isInside(Location loc);
+    public Location getLocation() {
+        return region.getLocation();
+    }
+    public boolean isNear(Location loc) {
+        return region.isNear(loc, nearDistance);
+    }
+    
+    public boolean isInside(Location loc) {
+        return region.isInside(loc);
+    }
     
     public boolean isInfomed(Player player) {
         return informedPlayers.contains(player.getUniqueId());
@@ -70,41 +126,53 @@ public abstract class InfoArea {
     
     public void addInformedPlayer(Player player) {
         informedPlayers.add(player.getUniqueId());
+        welcomePlayer(player);
     }
     
     public void removeInformedPlayer(Player player) {
         informedPlayers.remove(player.getUniqueId());
+        bossBar.removePlayer(player);
     }
         
-    public Map<String, Object> serialize() {
-        Map<String,Object> result = new HashMap();
-        result.put("center", serializeLocation(this.center));
-        result.put("description", description);
-        return result;
-    }
-    
-    private static Map<String,Object> serializeLocation(Location loc) {
-        Map<String,Object> result = new HashMap<>();
-        result.put("x", loc.getX());
-        result.put("y", loc.getY());
-        result.put("z", loc.getZ());
-        result.put("world", loc.getWorld().getName());
-        return result;
-    }
-    
-    private static Location deserializeLocation(ConfigurationSection data) {
-        if(data == null) {
-            return null;
-        }
-        World world = Bukkit.getWorld(data.getString("world"));
-        if(world == null) {
-            return null;
-        }
-        else {
-            return new Location(world, (Double) data.get("x"), 
-                                       (Double) data.get("y"), 
-                                       (Double) data.get("z"));
+    public void clearInformedPlayers() {
+        for(UUID uuid: informedPlayers) {
+            Player player = Bukkit.getPlayer(uuid);
+            if(player!=null) {
+                removeInformedPlayer(player);
+            }
         }
     }
-    
+    public void save(ConfigurationSection config) {
+        region.save(config);
+        config.set("description", description);
+        config.set("title",title);
+        config.set("subtitle",subtitle);
+        config.set("showScoreboard", showScoreboard);
+        config.set("showTitle",showTitle);
+    }
+   
+    private void welcomePlayer(final Player player) {
+        final InfoArea thisArea = this;
+        int messageDelay = 0;
+        if(isShowTitle()) {
+            TitleUtil.showTitle(player, getTitle(), getSubtitle(), 25, 20, 10);
+            messageDelay = 50;
+        }
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if(isShowScoreboard()) {
+                    //player.setScoreboard(area.getScoreboard());
+                    bossBar.addPlayer(player);
+                }
+                try {
+                    GuidebookShow.sendDescription(player, thisArea);
+                } catch (MessageParseException ex) {
+                    Logger.getLogger(PlayerListener.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }.runTaskLater(GuidebookPlugin.getPluginInstance(), messageDelay);
+        
+    }
+
 }

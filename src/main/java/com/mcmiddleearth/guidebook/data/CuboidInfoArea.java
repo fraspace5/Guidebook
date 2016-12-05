@@ -16,10 +16,12 @@
  */
 package com.mcmiddleearth.guidebook.data;
 
-import java.util.Map;
-import lombok.Getter;
+import com.mcmiddleearth.pluginutil.region.CuboidRegion;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -27,56 +29,57 @@ import org.bukkit.configuration.ConfigurationSection;
  */
 public class CuboidInfoArea extends InfoArea {
     
-    @Getter
-    private int sizeX = 1,
-                sizeY = 1,
-                sizeZ = 1;
-    
-    public CuboidInfoArea(Location center) {
-        super(center);
+    public CuboidInfoArea(Location center, com.sk89q.worldedit.regions.CuboidRegion weRegion) {
+        region = new CuboidRegion(center, weRegion);
     }
     
     public CuboidInfoArea(ConfigurationSection config) {
         super(config);
-        sizeX = config.getInt("xSize");
-        sizeY = config.getInt("ySize");
-        sizeZ = config.getInt("zSize");
+        if(config.contains("center")) {
+            Location center = deserializeLocation(config.getConfigurationSection("center"));
+            int sizeX = config.getInt("xSize");
+            int sizeY = config.getInt("ySize");
+            int sizeZ = config.getInt("zSize");
+            Vector minPos = new Vector(center.getBlockX()-sizeX/2,
+                                       center.getBlockY()-sizeY/2,
+                                       center.getBlockZ()-sizeZ/2);
+            Vector maxPos = new Vector(center.getBlockX()+sizeX/2,
+                                       center.getBlockY()+sizeY/2,
+                                       center.getBlockZ()+sizeZ/2);
+            region = new CuboidRegion(center,minPos, maxPos);
+        } else {
+            region = CuboidRegion.load(config);
+        }
     }
     
-    public void setSize(int x, int y, int z) {
-        sizeX = x;
+public void setCorners(Vector pos1, Vector pos2) {
+        ((CuboidRegion)region).setCorners(pos1, pos2);
+        /*sizeX = x;
         sizeY = y;
-        sizeZ = z;
+        sizeZ = z;*/
     }
 
-    @Override
-    public boolean isInside(Location loc) {
-        return getCenter().getWorld().equals(loc.getWorld())
-            && loc.getBlockX() >= getCenter().getBlockX()-sizeX/2
-            && loc.getBlockX() <= getCenter().getBlockX()+sizeX/2
-            && loc.getBlockY() >= getCenter().getBlockY()-sizeY/2
-            && loc.getBlockY() <= getCenter().getBlockY()+sizeY/2
-            && loc.getBlockZ() >= getCenter().getBlockZ()-sizeZ/2
-            && loc.getBlockZ() <= getCenter().getBlockZ()+sizeZ/2;
+    public Vector getMinPos() {
+        return ((CuboidRegion)region).getMinCorner();
     }
     
-    @Override
-    public boolean isNear(Location loc) {
-        return getCenter().getWorld().equals(loc.getWorld())
-            && loc.getBlockX() >= getCenter().getBlockX()-(sizeX+getNearDistance())/2
-            && loc.getBlockX() <= getCenter().getBlockX()+(sizeX+getNearDistance())/2
-            && loc.getBlockY() >= getCenter().getBlockY()-(sizeY+getNearDistance())/2
-            && loc.getBlockY() <= getCenter().getBlockY()+(sizeY+getNearDistance())/2
-            && loc.getBlockZ() >= getCenter().getBlockZ()-(sizeZ+getNearDistance())/2
-            && loc.getBlockZ() <= getCenter().getBlockZ()+(sizeZ+getNearDistance())/2;
+    public Vector getMaxPos() {
+        return ((CuboidRegion)region).getMaxCorner();
     }
     
-    @Override
-    public Map<String,Object> serialize() {
-        Map<String,Object> result = super.serialize();
-        result.put("xSize", sizeX);
-        result.put("ySize", sizeY);
-        result.put("zSize", sizeZ);
-        return result;
+    private static Location deserializeLocation(ConfigurationSection data) {
+        if(data == null) {
+            return null;
+        }
+        World world = Bukkit.getWorld(data.getString("world"));
+        if(world == null) {
+            return null;
+        }
+        else {
+            return new Location(world, (Double) data.get("x"), 
+                                       (Double) data.get("y"), 
+                                       (Double) data.get("z"));
+        }
     }
+    
 }

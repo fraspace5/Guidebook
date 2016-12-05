@@ -28,7 +28,7 @@ import org.bukkit.entity.Player;
  * @author Ivanpl, Eriol_Eandur
  */
 
-public class MessageUtil {
+public class MessageUtil_invalid {
     
     @Getter
     private static final String PREFIX   = "[Guidebook] ";

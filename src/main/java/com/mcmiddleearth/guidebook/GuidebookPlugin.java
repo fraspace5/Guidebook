@@ -39,4 +39,9 @@ public class GuidebookPlugin extends JavaPlugin{
         getCommand("guidebook").setExecutor(new GuidebookCommandExecutor());
         getLogger().info("Enabled!");
     }
+    
+    @Override
+    public void onDisable() {
+        PluginData.disable();
+    }
 }

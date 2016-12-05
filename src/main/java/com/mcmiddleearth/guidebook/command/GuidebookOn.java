@@ -6,7 +6,6 @@
 package com.mcmiddleearth.guidebook.command;
 
 import com.mcmiddleearth.guidebook.data.PluginData;
-import com.mcmiddleearth.guidebook.util.MessageUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -26,7 +25,7 @@ public class GuidebookOn extends GuidebookCommand{
     protected void execute(CommandSender cs, String... args) {
         Player player = (Player)cs;
         PluginData.include(player);
-        MessageUtil.sendInfoMessage(cs, "You will now receive info messages from Guidebook.");
+        PluginData.getMessageUtil().sendInfoMessage(cs, "You will now receive info messages from Guidebook.");
     }
     
 }

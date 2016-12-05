@@ -5,7 +5,7 @@
  */
 package com.mcmiddleearth.guidebook.command;
 
-import com.mcmiddleearth.guidebook.util.MessageUtil;
+import com.mcmiddleearth.guidebook.data.PluginData;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.Bukkit;
@@ -62,23 +62,23 @@ public class GuidebookHelp extends GuidebookCommand{
     }
 
     private void sendHelpStartMessage(CommandSender cs) {
-        MessageUtil.sendInfoMessage(cs, "Help for Guidebook plugin.");
+        PluginData.getMessageUtil().sendInfoMessage(cs, "Help for Guidebook plugin.");
     }
 
     private void sendNoSuchCommandMessage(CommandSender cs, String arg) {
-        MessageUtil.sendNoPrefixInfoMessage(cs, "/guidebook "+arg+": There is no such command.");    
+        PluginData.getMessageUtil().sendNoPrefixInfoMessage(cs, "/guidebook "+arg+": There is no such command.");    
     }
 
     private void sendDescriptionMessage(CommandSender cs, String arg, String description) {
-        MessageUtil.sendNoPrefixInfoMessage(cs, "/guidebook "+arg+description);
+        PluginData.getMessageUtil().sendNoPrefixInfoMessage(cs, "/guidebook "+arg+description);
     }
 
     private void sendNoDescriptionMessage(CommandSender cs, String arg) {
-        MessageUtil.sendNoPrefixInfoMessage(cs, "/guidebook "+arg+": There is no help for this command.");
+        PluginData.getMessageUtil().sendNoPrefixInfoMessage(cs, "/guidebook "+arg+": There is no help for this command.");
     }
 
    private void sendManualMessage(CommandSender cs) {
-        MessageUtil.sendNoPrefixInfoMessage(cs, "Manual: TBD");
+        PluginData.getMessageUtil().sendNoPrefixInfoMessage(cs, "Manual: TBD");
     }
 
 }

@@ -8,11 +8,13 @@ package com.mcmiddleearth.guidebook.command;
 import com.mcmiddleearth.guidebook.data.CuboidInfoArea;
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
-import com.mcmiddleearth.guidebook.util.MessageUtil;
+import com.mcmiddleearth.guidebook.data.PrismoidInfoArea;
+import com.mcmiddleearth.guidebook.data.SphericalInfoArea;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.command.CommandSender;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -33,6 +35,58 @@ public class GuidebookSize extends GuidebookCommand{
             sendNoAreaErrorMessage(cs);
         }
         else {
+            if(area instanceof SphericalInfoArea) {
+                int radius = parseInt(cs, args[1]);
+                if(radius==-1) {
+                    sendNotANumberMessage(cs);
+                    return;
+                }
+                ((SphericalInfoArea)area).setRadius(radius);
+            }
+            else if(area instanceof CuboidInfoArea) {
+                if(args.length<7) {
+                    sendMissingArgumentErrorMessage(cs);
+                    return;
+                }
+                int[] data = new int[6];
+                for(int i = 0; i<6; i++) {
+                    data[i] = parseInt(cs, args[i+1]);
+                    if(data[i]==-1) {
+                        sendNotANumberMessage(cs);
+                        return;
+                    }
+                }
+                ((CuboidInfoArea)area).setCorners(new Vector(data[0],data[1],data[2]),
+                                                           new Vector(data[3],data[4],data[5]));
+            } else {
+                if(args.length<3) {
+                    sendMissingArgumentErrorMessage(cs);
+                    return;
+                }
+                int[] data = new int[2];
+                for(int i = 0; i<2; i++) {
+                    data[i] = parseInt(cs, args[i+1]);
+                    if(data[i]==-1) {
+                        sendNotANumberMessage(cs);
+                        return;
+                    }
+                }
+                ((PrismoidInfoArea)area).setHeight(data[0],data[1]);
+            }
+            try {
+                PluginData.saveData();
+            } catch (IOException ex) {
+                sendIOErrorMessage(cs);
+                Logger.getLogger(GuidebookSize.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            sendSizeSetMessage(cs);
+        }
+
+        /*InfoArea area = PluginData.getInfoArea(args[0]);
+        if(area==null) {
+            sendNoAreaErrorMessage(cs);
+        }
+        else {
             /*if(area instanceof SphericalTeleportationArea) {
                 int radius = parseInt(cs, args[1]);
                 if(radius==-1) {
@@ -41,7 +95,7 @@ public class GuidebookSize extends GuidebookCommand{
                 ((SphericalTeleportationArea)area).setRadius(radius);
             }
             else {*/
-                if(args.length<4) {
+                /*if(args.length<4) {
                     sendMissingArgumentErrorMessage(cs);
                     return;
                 }
@@ -66,7 +120,7 @@ public class GuidebookSize extends GuidebookCommand{
                 Logger.getLogger(GuidebookSize.class.getName()).log(Level.SEVERE, null, ex);
             }
             sendSizeSetMessage(cs);
-        }
+        }*/
     }
 
     private int parseInt(CommandSender cs, String arg) {
@@ -80,10 +134,10 @@ public class GuidebookSize extends GuidebookCommand{
     }
 
     private void sendSizeSetMessage(CommandSender cs) {
-        MessageUtil.sendInfoMessage(cs, "Size of Guidebook area set.");
+        PluginData.getMessageUtil().sendInfoMessage(cs, "Size of Guidebook area set.");
     }
 
     private void sendNotANumberMessage(CommandSender cs) {
-        MessageUtil.sendInfoMessage(cs, "Invalid argument. Not a whole number.");
+        PluginData.getMessageUtil().sendInfoMessage(cs, "Invalid argument. Not a whole number.");
     }
 }
