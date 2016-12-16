@@ -5,6 +5,8 @@
  */
 package com.mcmiddleearth.guidebook.command;
 
+import com.mcmiddleearth.guidebook.GuidebookPlugin;
+import com.mcmiddleearth.guidebook.conversation.ConfirmationFactory;
 import com.mcmiddleearth.guidebook.conversation.Confirmationable;
 import com.mcmiddleearth.guidebook.data.CuboidInfoArea;
 import com.mcmiddleearth.guidebook.data.InfoArea;
@@ -142,10 +144,10 @@ public class GuidebookSet extends GuidebookCommand implements Confirmationable{
             saveData(cs);
             sendNewAreaMessage(cs);
         }*/
-        /*else {
+        else {
             new ConfirmationFactory(GuidebookPlugin.getPluginInstance()).start((Player) cs, 
                     "An area with that name already exists. Do you want to move it to your location and selection?", this);
-        }*/
+        }
     }
 
     private void saveData(CommandSender cs){

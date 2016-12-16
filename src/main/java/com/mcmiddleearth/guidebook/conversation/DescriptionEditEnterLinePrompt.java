@@ -65,7 +65,7 @@ public class DescriptionEditEnterLinePrompt extends NumericPrompt{
             ((InfoArea)cc.getSessionData("area")).getDescription().remove(input.intValue()-1);
             sendLineRemovedMessage((Player)cc.getSessionData("player"));
             cc.setSessionData("save", true);
-            return Prompt.END_OF_CONVERSATION;
+            return new DescriptionEditSavePrompt();
         }
         cc.setSessionData("line", input.intValue());
         return new DescriptionEditEnterDescriptionPrompt();

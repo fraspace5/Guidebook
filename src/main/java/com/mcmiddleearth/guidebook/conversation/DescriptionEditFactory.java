@@ -69,46 +69,18 @@ public class DescriptionEditFactory implements ConversationAbandonedListener{
         Player player = (Player) cc.getSessionData("player");
         InfoArea area = (InfoArea) cc.getSessionData("area");
         if (abandonedEvent.gracefulExit()) {
-            if((Boolean) cc.getSessionData("save")) {
-                try {
-                    PluginData.saveData();
-                } catch (IOException ex) {
-                    sendIOErrorMessage(player);
-                    Logger.getLogger(GuidebookDescription.class.getName()).log(Level.SEVERE, null, ex);
-                    return;
-                }
-                sendDescriptionSetMessage(player);
-                try {
-                    GuidebookShow.sendDescription(player, area);
-                } catch (MessageParseException ex) {
-                    Logger.getLogger(GuidebookDescription.class.getName()).log(Level.SEVERE, null, ex);
-                    sendParseError(player);
-                }
-            }
-            new FancyMessage(PluginData.getMessageUtil())
-                                            .addClickable("Click here to continue to edit this description.",
-                                                          "/guidebook description "+((String) cc.getSessionData("name")))
-                                            .setRunDirect()
-                                            .send(player);
+            sendEditEndedMessage(player);
         } else {
             sendEditCancelledMessage(player);
         }
     }
 
-    private void sendParseError(Player cs) {
-        PluginData.getMessageUtil().sendErrorMessage(cs, "There was an error while loading the Descriptions. Probably you entered an invalid description.");
-    }
-
-    private void sendDescriptionSetMessage(CommandSender cs) {
-        PluginData.getMessageUtil().sendInfoMessage(cs, "This description of guidebook area was saved:");
-    }
-
-    protected void sendIOErrorMessage(CommandSender cs) {
-        PluginData.getMessageUtil().sendErrorMessage(cs, "There was an error. Guidebook data were NOT saved.");
-    }
-
     private void sendEditCancelledMessage(Player player) {
         PluginData.getMessageUtil().sendInfoMessage(player, "Guidebook description conversation was cancelled by command or timeout.");
+    }
+    
+    private void sendEditEndedMessage(Player player) {
+        PluginData.getMessageUtil().sendInfoMessage(player, "Guidebook description conversation ended.");
     }
 
 }

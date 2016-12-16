@@ -19,7 +19,10 @@ package com.mcmiddleearth.guidebook.data;
 import com.mcmiddleearth.guidebook.GuidebookPlugin;
 import com.mcmiddleearth.guidebook.command.GuidebookShow;
 import com.mcmiddleearth.guidebook.listener.PlayerListener;
+import com.mcmiddleearth.guidebook.util.InputUtil;
 import com.mcmiddleearth.pluginutil.TitleUtil;
+import com.mcmiddleearth.pluginutil.message.FancyMessage;
+import com.mcmiddleearth.pluginutil.message.config.FancyMessageConfigUtil;
 import com.mcmiddleearth.pluginutil.message.config.MessageParseException;
 import com.mcmiddleearth.pluginutil.region.Region;
 import java.util.ArrayList;
@@ -33,11 +36,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -45,6 +51,8 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @author Eriol_Eandur
  */
 public abstract class InfoArea {
+    
+    private static final int CHAT_LENGTH = 90;
     
     protected Region region;
     
@@ -68,7 +76,6 @@ public abstract class InfoArea {
     private boolean showScoreboard;
             
     @Getter
-    @Setter
     private List<String> description = new ArrayList<>();
     
     private final int nearDistance = 10;
@@ -173,6 +180,42 @@ public abstract class InfoArea {
             }
         }.runTaskLater(GuidebookPlugin.getPluginInstance(), messageDelay);
         
+    }
+
+    public ItemStack getDescriptionBook() {
+        ItemStack book = new ItemStack(Material.BOOK_AND_QUILL,1);
+        BookMeta bookMeta = (BookMeta) book.getItemMeta();
+        for(String line: description) {
+            bookMeta.addPage(InputUtil.replaceColorCodeWithAltCode(line));
+        }
+        book.setItemMeta(bookMeta);
+        return book;
+    }
+    
+    public void setDescription(BookMeta bookMeta) throws MessageParseException {
+        List<String> lines = new ArrayList<>();
+        for(int i = 1; i<=bookMeta.getPageCount();i++) { //first page has index 1!!!
+            String line = bookMeta.getPage(i);
+            lines.add(InputUtil.replaceBookColorCode(line.substring(0,Math.min(CHAT_LENGTH,line.length()))));
+            //debugString(lines.get(lines.size()-1));
+            if(line.length()>CHAT_LENGTH) {
+                lines.add(InputUtil.replaceBookColorCode(line.substring(CHAT_LENGTH, line.length()))); //string from book seem to contain random 'Â§0' characters
+                //debugString(lines.get(lines.size()-1));
+            }
+        }
+        FancyMessageConfigUtil.addFromStringList(new FancyMessage(PluginData.getMessageUtil()),
+                                                 lines); //throws MessageParseExeption
+        description = lines;
+    }
+    
+    private void debugString(String string) {
+        for(int i=0; i<string.length();i++){
+            Logger.getGlobal().info("i: "+string.charAt(i)+" "+new Integer(string.charAt(i)).intValue()+" "+string.codePointAt(i));
+        }
+    }
+    
+    public void setDescription(List<String> lines) {
+        description = lines;
     }
 
 }

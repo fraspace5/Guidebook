@@ -9,11 +9,16 @@ import com.mcmiddleearth.guidebook.GuidebookPlugin;
 import com.mcmiddleearth.guidebook.conversation.DescriptionEditFactory;
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
+import com.mcmiddleearth.pluginutil.message.config.MessageParseException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 
 /**
  *
@@ -22,7 +27,7 @@ import org.bukkit.entity.Player;
 public class GuidebookDescription extends GuidebookCommand{
     
     public GuidebookDescription(String... permissionNodes) {
-        super(0, true, permissionNodes);
+        super(1, true, permissionNodes);
         setShortDescription(": Defines the description of a Guidebook area.");
         setUsageDescription(" <AreaName>: Initiates a conversation to edit the Guidbook area's description.");
     }
@@ -34,74 +39,41 @@ public class GuidebookDescription extends GuidebookCommand{
             sendNoAreaErrorMessage(cs);
         }
         else {
+            if(args.length>1) {
+                Player player = (Player)cs;
+                if(args[1].equalsIgnoreCase("getbook")) {
+                    player.getInventory().addItem(area.getDescriptionBook());
+                    sendBookGivenMessage(cs);
+                    return;
+                } else if(args[1].equalsIgnoreCase("save")) {
+                    ItemStack handItem = player.getInventory().getItemInMainHand();
+                    if(!(handItem.getType().equals(Material.BOOK_AND_QUILL)
+                            || handItem.getType().equals(Material.BOOK))) {
+                        sendNoBookMessage(cs);
+                        return;
+                    } else {
+                        try {
+                            area.setDescription((BookMeta) handItem.getItemMeta());
+                            try {
+                                PluginData.saveData();
+                            } catch (IOException ex) {
+                                sendIOErrorMessage(player);
+                                Logger.getLogger(GuidebookDescription.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                           sendDescriptionSetMessage(cs);
+                            GuidebookShow.sendDescription(player, area);
+                        } catch (MessageParseException ex) {
+                            Logger.getLogger(GuidebookDescription.class.getName()).log(Level.SEVERE, null, ex);
+                            sendParseError(player);
+                        }
+                        return;
+                    }
+                }
+            }
             if(((Player)cs).isConversing()) {
                 sendAlreadyConversing((Player) cs);
             }
             new DescriptionEditFactory(GuidebookPlugin.getPluginInstance()).start((Player)cs, area, args[0]);
-        /*    int line = -1;
-            int descriptionIndexShift=0;
-            if(args.length>3 && NumericUtil.isInt(args[2])) {
-                    descriptionIndexShift=1;
-                    line = Math.max(NumericUtil.getInt(args[2]),-1);
-            }
-Logger.getGlobal().log(Level.INFO, "Line *** {0}", line);
-            if(args.length>3 || args[1].equals("-d")) {
-                switch (args[1]) {
-                    case "-i":
-                    {
-                        String areaDescription = getDescription(args,2+descriptionIndexShift);
-                        if(line>0 && line<area.getDescription().size()) {
-                            area.getDescription().add(line-1, areaDescription);
-                            sendLineInsertedMessage(cs);
-                        } else {
-                            sendIndexOutOfBoundsMessage(cs);
-                            return;
-                        }
-                        break;
-                    }
-                    case "-r":
-                    {
-                        String areaDescription = getDescription(args,2+descriptionIndexShift);
-                        if(line>0 && line<area.getDescription().size()) {
-                            area.getDescription().set(line-1, areaDescription);
-                            sendLineReplacedMessage(cs);
-                        } else {
-                            sendIndexOutOfBoundsMessage(cs);
-                            return;
-                        }
-                        break;
-                    }
-                    case "-d":
-                    {
-                        if(line>0 && line<area.getDescription().size()) {
-                            area.getDescription().remove(line-1);
-                            sendLineRemovedMessage(cs);
-                        } else {
-                            sendIndexOutOfBoundsMessage(cs);
-                            return;
-                        }
-                        break;
-                    }
-                    default:
-                    {
-                        String areaDescription = getDescription(args,1);
-                        area.getDescription().add(areaDescription);
-                        sendLineAddedMessage(cs);
-                    }
-                }
-            } else {
-                String areaDescription = getDescription(args,1);
-                area.getDescription().add(areaDescription);
-                sendLineAddedMessage(cs);
-            }
-            saveData(cs);
-            sendDescriptionSetMessage(cs);
-            try {
-                GuidebookShow.sendDescription((Player)cs, area);
-            } catch (MessageParseException ex) {
-                Logger.getLogger(GuidebookDescription.class.getName()).log(Level.SEVERE, null, ex);
-                sendParseError(cs);
-            }*/
         }
     }
     
@@ -110,7 +82,6 @@ Logger.getGlobal().log(Level.INFO, "Line *** {0}", line);
         for(int i = startIndex+1; i<args.length;i++) {
             areaDescription = areaDescription + " "+args[i];
         }
-Logger.getGlobal().info("Desc*** "+areaDescription);
         return areaDescription;
     }
 
@@ -153,6 +124,14 @@ Logger.getGlobal().info("Desc*** "+areaDescription);
 
     private void sendLineAddedMessage(CommandSender cs) {
         PluginData.getMessageUtil().sendInfoMessage(cs, "Line added.");
+    }
+
+    private void sendBookGivenMessage(CommandSender cs) {
+        PluginData.getMessageUtil().sendInfoMessage(cs, "Descriptions was written into a book and placed in your inventory.");
+    }
+
+    private void sendNoBookMessage(CommandSender cs) {
+        PluginData.getMessageUtil().sendErrorMessage(cs, "No book in main hand to get the description from.");
     }
 
 }

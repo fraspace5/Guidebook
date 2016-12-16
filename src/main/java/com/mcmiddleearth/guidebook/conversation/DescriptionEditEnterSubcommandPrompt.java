@@ -30,14 +30,14 @@ import org.bukkit.entity.Player;
 public class DescriptionEditEnterSubcommandPrompt extends FixedSetPrompt{
 
     public DescriptionEditEnterSubcommandPrompt() {
-        super(new String[]{"s","a","i","d","r","c"});
+        super(new String[]{"s","a","i","d","r","c","x"});
     }
     
     @Override
     public String getPromptText(ConversationContext cc) {
         return "What do you want to do? \n's': show lines\n'a': add a line\n"
                 + "'i': insert a line\n'd': delete a line\n'r': replace a line\n"
-                + "'c': clear all lines";
+                + "'c': clear all lines\n'x': exit";
     }
     
     @Override
@@ -47,25 +47,28 @@ public class DescriptionEditEnterSubcommandPrompt extends FixedSetPrompt{
 
     @Override
     protected Prompt acceptValidatedInput(ConversationContext cc, String input) {
-        if(input.equalsIgnoreCase("s")) {
-            PluginData.getMessageUtil().sendInfoMessage((Player)cc.getSessionData("player"),"Current description:");
-            int i=1;
-            for(String line: ((InfoArea)cc.getSessionData("area")).getDescription()) {
-                PluginData.getMessageUtil().sendIndentedInfoMessage((Player)cc.getSessionData("player"), "["+i+"] "+line);
-                i++;
-            }
-            return Prompt.END_OF_CONVERSATION;
-        } else if(input.equalsIgnoreCase("c")) {
-            ((InfoArea)cc.getSessionData("area")).getDescription().clear();
-            sendDescriptionCleared((Player)cc.getSessionData("player"));
-            cc.setSessionData("save", true);
-            return Prompt.END_OF_CONVERSATION;
-        } else if(input.equalsIgnoreCase("a")) {
-            cc.setSessionData("mode", input);
-            return new DescriptionEditEnterDescriptionPrompt();
-        } else {
-            cc.setSessionData("mode", input);
-            return new DescriptionEditEnterLinePrompt();
+        switch(input) {
+            case "s":
+                PluginData.getMessageUtil().sendInfoMessage((Player)cc.getSessionData("player"),"Current description:");
+                int i=1;
+                for(String line: ((InfoArea)cc.getSessionData("area")).getDescription()) {
+                    PluginData.getMessageUtil().sendIndentedInfoMessage((Player)cc.getSessionData("player"), "["+i+"] "+line);
+                    i++;
+                }
+                return new DescriptionEditEnterSubcommandPrompt();
+            case "c":
+                ((InfoArea)cc.getSessionData("area")).getDescription().clear();
+                sendDescriptionCleared((Player)cc.getSessionData("player"));
+                cc.setSessionData("save", true);
+                return new DescriptionEditEnterSubcommandPrompt();
+            case "a":
+                cc.setSessionData("mode", input);
+                return new DescriptionEditEnterDescriptionPrompt();
+            case "x":
+                return Prompt.END_OF_CONVERSATION;
+            default:
+                cc.setSessionData("mode", input);
+                return new DescriptionEditEnterLinePrompt();
         }
     }
     

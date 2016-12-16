@@ -20,7 +20,6 @@ import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
 import com.mcmiddleearth.guidebook.util.InputUtil;
 import java.util.List;
-import java.util.logging.Logger;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
@@ -61,7 +60,7 @@ public class DescriptionEditEnterDescriptionPrompt extends StringPrompt{
                 return Prompt.END_OF_CONVERSATION;
         }
         cc.setSessionData("save", true);
-        return Prompt.END_OF_CONVERSATION;
+        return new DescriptionEditSavePrompt();
     }
  
     private void sendLineInsertedMessage(CommandSender cs) {
