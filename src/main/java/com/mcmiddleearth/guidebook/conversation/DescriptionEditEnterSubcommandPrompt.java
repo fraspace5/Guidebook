@@ -18,6 +18,10 @@ package com.mcmiddleearth.guidebook.conversation;
 
 import com.mcmiddleearth.guidebook.data.InfoArea;
 import com.mcmiddleearth.guidebook.data.PluginData;
+import com.mcmiddleearth.guidebook.util.InputUtil;
+import com.mcmiddleearth.pluginutil.message.FancyMessage;
+import com.mcmiddleearth.pluginutil.message.MessageType;
+import org.bukkit.ChatColor;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.FixedSetPrompt;
 import org.bukkit.conversations.Prompt;
@@ -52,7 +56,13 @@ public class DescriptionEditEnterSubcommandPrompt extends FixedSetPrompt{
                 PluginData.getMessageUtil().sendInfoMessage((Player)cc.getSessionData("player"),"Current description:");
                 int i=1;
                 for(String line: ((InfoArea)cc.getSessionData("area")).getDescription()) {
-                    PluginData.getMessageUtil().sendIndentedInfoMessage((Player)cc.getSessionData("player"), "["+i+"] "+line);
+                    new FancyMessage(MessageType.HIGHLIGHT_NO_PREFIX, PluginData.getMessageUtil())
+                            .addSimple(ChatColor.DARK_AQUA+"["+i+"] ")
+                            .addFancy(InputUtil.replaceColorCodeWithAltCode(line),
+                                      InputUtil.replaceColorCodeWithAltCode(line), 
+                                      "Click to copy into chat.")
+                            .send((Player)cc.getSessionData("player"));
+                    //PluginData.getMessageUtil().sendIndentedInfoMessage((Player)cc.getSessionData("player"), "["+i+"] "+line);
                     i++;
                 }
                 return new DescriptionEditEnterSubcommandPrompt();
