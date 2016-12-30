@@ -22,7 +22,7 @@ import org.bukkit.entity.Player;
 public class GuidebookTitle extends GuidebookCommand{
     
     public GuidebookTitle(String... permissionNodes) {
-        super(0, true, permissionNodes);
+        super(1, true, permissionNodes);
         setShortDescription(": Defines the title of a Guidebook area.");
         setUsageDescription(" <AreaName>: Initiates a conversation to configure a Guidebook area's title.");
     }
