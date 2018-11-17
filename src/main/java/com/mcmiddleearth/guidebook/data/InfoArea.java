@@ -189,7 +189,7 @@ public abstract class InfoArea {
     }
 
     public ItemStack getDescriptionBook() {
-        ItemStack book = new ItemStack(Material.BOOK_AND_QUILL,1);
+        ItemStack book = new ItemStack(Material.WRITABLE_BOOK,1);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         for(String line: description) {
             bookMeta.addPage(InputUtil.replaceColorCodeWithAltCode(line));

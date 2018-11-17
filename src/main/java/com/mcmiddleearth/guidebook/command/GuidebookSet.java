@@ -5,6 +5,8 @@
  */
 package com.mcmiddleearth.guidebook.command;
 
+import com.boydti.fawe.FaweAPI;
+import com.boydti.fawe.object.FawePlayer;
 import com.mcmiddleearth.guidebook.GuidebookPlugin;
 import com.mcmiddleearth.guidebook.conversation.ConfirmationFactory;
 import com.mcmiddleearth.guidebook.conversation.Confirmationable;
@@ -74,9 +76,9 @@ public class GuidebookSet extends GuidebookCommand implements Confirmationable{
                 return;
             }
         } else {
-            try {
-                region = WorldEdit.getInstance().getSession(p.getName()).getRegion();
-            } catch (NullPointerException | IncompleteRegionException ex) {}
+            //try {
+                region = FawePlayer.wrap(p).getSelection();
+            //} catch (NullPointerException | IncompleteRegionException ex) {}
             if(!(region instanceof CuboidRegion || region instanceof Polygonal2DRegion) ) {
                 sendInvalidSelection(p);
                 return;
