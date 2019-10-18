@@ -26,55 +26,43 @@ import org.bukkit.command.CommandSender;
  *
  * @author Fraspace5
  */
-
 public class GuidebookEn extends GuidebookCommand {
-    
+
     public GuidebookEn(String... permissionNodes) {
         super(1, true, permissionNodes);
         setShortDescription(": Enable a guidebook");
         setUsageDescription(" To use that command type /guidebook enable guidebook");
     }
-    
+
     //guidebook enable guidebookname
     //           0        1       
-    
     @Override
     protected void execute(CommandSender cs, String... args) {
-    
-        PluginData.loadData();
-        
-        
-    if (args.length == 1){
-    
-    if (PluginData.getInfoAreas().containsKey(args[0])){
-    
-    PluginData.getInfoArea(args[0]).statusOn();
-    
-        try {
-            PluginData.saveArea(PluginData.getInfoArea(args[0]));
-        } catch (IOException ex) {
-            Logger.getLogger(GuidebookEn.class.getName()).log(Level.SEVERE, null, ex);
+
+        if (args.length == 1) {
+
+            if (PluginData.getInfoAreas().containsKey(args[0])) {
+
+                PluginData.getInfoArea(args[0]).statusOn();
+
+                try {
+                    PluginData.saveArea(PluginData.getInfoArea(args[0]));
+                } catch (IOException ex) {
+                    Logger.getLogger(GuidebookEn.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                PluginData.getMessageUtil().sendInfoMessage(cs, "Guidebook area " + args[0] + " Enabled");
+
+            } else {
+                PluginData.getMessageUtil().sendErrorMessage(cs, "This area doesn't exist");
+            }
+
+        } else {
+
+            PluginData.getMessageUtil().sendErrorMessage(cs, "Invalid Usage! /guidebook enable guidebook");
+
         }
-    
-    PluginData.getMessageUtil().sendInfoMessage(cs, "Guidebook area "+args[0]+" Enabled");
-    
-    
-    
+
     }
-    else {
-    PluginData.getMessageUtil().sendErrorMessage(cs, "This area doesn't exist");
-    }
-    
-    
-    }else {
-    
-    PluginData.getMessageUtil().sendErrorMessage(cs, "Invalid Usage! /guidebook enable guidebook");
-    
-    }
-    
-        
-    
-    }
-    
-    
+
 }

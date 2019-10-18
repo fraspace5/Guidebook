@@ -28,57 +28,45 @@ import org.bukkit.command.CommandSender;
  * @author Fraspace5
  */
 public class GuidebookRen extends GuidebookCommand {
-    
+
     public GuidebookRen(String... permissionNodes) {
         super(1, true, permissionNodes);
         setShortDescription(": Rename a guidebook");
         setUsageDescription(" To use that command type /guidebook rename oldname newname");
     }
-    
+
     //guidebook rename oldname newname
     //                  0       1
-    
     @Override
     protected void execute(CommandSender cs, String... args) {
-    
-    PluginData.loadData();
-        
-        
-    if (args.length == 2){
-    
-    if (PluginData.getInfoAreas().containsKey(args[0])){
-    
-    InfoArea area = PluginData.getInfoAreas().get(args[0]);
-    
-    PluginData.addInfoArea(args[1], area);
-    
-    PluginData.deleteInfoArea(args[0]);
-    
-    PluginData.getMessageUtil().sendInfoMessage(cs, "Guidebook area "+args[0]+" has been renamed with "+args[1]);
-        try {
-            PluginData.saveArea(area);
-        } catch (IOException ex) {
-            Logger.getLogger(GuidebookRen.class.getName()).log(Level.SEVERE, null, ex);
+
+        if (args.length == 2) {
+
+            if (PluginData.getInfoAreas().containsKey(args[0])) {
+
+                InfoArea area = PluginData.getInfoAreas().get(args[0]);
+
+                PluginData.addInfoArea(args[1], area);
+
+                PluginData.deleteInfoArea(args[0]);
+
+                PluginData.getMessageUtil().sendInfoMessage(cs, "Guidebook area " + args[0] + " has been renamed with " + args[1]);
+                try {
+                    PluginData.saveArea(area);
+                } catch (IOException ex) {
+                    Logger.getLogger(GuidebookRen.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            } else {
+                PluginData.getMessageUtil().sendErrorMessage(cs, "This area doesn't exist");
+            }
+
+        } else {
+
+            PluginData.getMessageUtil().sendErrorMessage(cs, "Invalid Usage! /guidebook rename oldname newname");
+
         }
-    
+
     }
-    else {
-    PluginData.getMessageUtil().sendErrorMessage(cs, "This area doesn't exist");
-    }
-    
-    
-    }else {
-    
-    PluginData.getMessageUtil().sendErrorMessage(cs, "Invalid Usage! /guidebook rename oldname newname");
-    
-    }
-    
-    
-    
-    
-    }
-    
-    
-    
-    
+
 }

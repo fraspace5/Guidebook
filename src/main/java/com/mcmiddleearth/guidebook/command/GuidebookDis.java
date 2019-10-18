@@ -16,7 +16,6 @@
  */
 package com.mcmiddleearth.guidebook.command;
 
-
 import com.mcmiddleearth.guidebook.data.PluginData;
 
 import org.bukkit.command.CommandSender;
@@ -26,45 +25,35 @@ import org.bukkit.command.CommandSender;
  * @author Fraspace5
  */
 public class GuidebookDis extends GuidebookCommand {
-    
+
     public GuidebookDis(String... permissionNodes) {
         super(1, true, permissionNodes);
         setShortDescription(": Disable a guidebook");
         setUsageDescription(" To use that command type /guidebook disable guidebook");
     }
-    
+
     //guidebook disable guidebookname
     //           0        1       
-    
     @Override
     protected void execute(CommandSender cs, String... args) {
-    
-        PluginData.loadData();
-        
-        
-    if (args.length == 1){
-    
-    if (PluginData.getInfoAreas().containsKey(args[0])){
-    
-    PluginData.getInfoArea(args[0]).statusOff();
-    PluginData.getMessageUtil().sendInfoMessage(cs, "Guidebook area "+args[0]+" Disabled");
-        
-    
+
+        if (args.length == 1) {
+
+            if (PluginData.getInfoAreas().containsKey(args[0])) {
+
+                PluginData.getInfoArea(args[0]).statusOff();
+                PluginData.getMessageUtil().sendInfoMessage(cs, "Guidebook area " + args[0] + " Disabled");
+
+            } else {
+                PluginData.getMessageUtil().sendErrorMessage(cs, "This area doesn't exist");
+            }
+
+        } else {
+
+            PluginData.getMessageUtil().sendErrorMessage(cs, "Invalid Usage! /guidebook disable guidebook");
+
+        }
+
     }
-    else {
-    PluginData.getMessageUtil().sendErrorMessage(cs, "This area doesn't exist");
-    }
-    
-    
-    }else {
-    
-    PluginData.getMessageUtil().sendErrorMessage(cs, "Invalid Usage! /guidebook disable guidebook");
-    
-    }
-    
-        
-    
-    }
-    
-    
+
 }
